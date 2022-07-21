@@ -14,6 +14,13 @@
 %        available via paleo-temperature.org & figshare
 %   (2): StageNamesandAges (E. Judd et al., 2022)
 %        available via paleo-temperature.org, figshare, & Github
+%   (3): World countries shape file 
+%        https://www.arcgis.com/home/item.html?id=170b5e6529064b8d9275168687880359
+% Auxillary functions needed
+%   (1): MATLAB mapping toolbox (if running the manual QC checks)
+%   (2): customcolormap (if running the manual QC checks)
+%        (V. Martínez-Cagigal, 2022) available on MATLAB file exchange:
+%        https://www.mathworks.com/matlabcentral/fileexchange/69470-custom-colormap
 
 % Checks include:
 % 1) LOCATION INFORMATION
@@ -21,6 +28,7 @@
 %        valid accepted names
 %    (b) Confirm that no lats/lons are missing and all values fall within
 %        an appropriate (decimal degree) range
+%    (c) Confirm coordinates are consistent with country names
 % 2) AGE INFORMATION
 %    (a) Confirm all entries a numeric age, Period, and Stage information
 %    (b) Confirm all entries have accepted GTS2020 Period and Stage names
@@ -37,11 +45,17 @@
 %   (b) Check for missing Year values
 %   (c) Check for missing PublicationDOI values
 
+
+% This Script is broken into 4 parts:
+%   (1) Load data
+%   (2) Automated QC Checks 
+%   (3) Manual QC Checks
+
 % INSTRUCTIONS: Load data, then run the automated QC checks.
 %               The results of each test will appear in the command line
 %               followed by a summary once all tests are completed.
 
-%% Load in data data
+%% Part 1: Load in data data
 % (1) Define filename (and path)
 filename="PhanSST_v001.csv";    
 
@@ -65,8 +79,9 @@ opts = setvaropts(opts,stringfields,'FillValue',"");
 %     files)
 PhanSST = readtable(filename, opts);
 GTS = readtable("StageNamesandAges.xlsx");
+shapefilename = "World_Countries__Generalized_.shp";
 
-%% RUN AUTOMATED CHECKS
+%% Part 2: AUTOMATED CHECKS
 FailedTests = [];
 % 1) LOCATION INFORMATION
 %    (a) Confirm all entries have a ContinentOcean values & that they are
@@ -104,6 +119,38 @@ else
     disp("Check 1b Failed: Entries with missing and invalid coordinates")
     FailedTests = [FailedTests; "Check 1b"];
 end
+%    (c) Confirm coordinates are consistent with country names
+%        NOTE: not all inconsistenties will reflect true errors - some data
+%        lie near the (sometimes disputed) borders of countries, so if this
+%        fails, you will need to manually inspect the ErrorSites to
+%        identify which inconsistencies should be addressed.
+S = shaperead(shapefilename);
+S = struct2table(S);
+S.COUNTRY(S.COUNTRY == "United States") = {'United States of America'};
+S.COUNTRY(S.COUNTRY == "Russian Federation") = {'Russia'};
+S.COUNTRY(S.COUNTRY == "Netherlands") = {'The Netherlands'};
+S.COUNTRY(S.COUNTRY == "Svalbard") = {'Norway'};
+S.COUNTRY(S.COUNTRY == "Antarctica") = {''};
+sitelist = unique([PhanSST.Country, PhanSST.ModLat, PhanSST.ModLon],'rows');
+country = sitelist(:,1); 
+lat = str2double(sitelist(:,2));
+lon = str2double(sitelist(:,3));
+ErrorSites = [];
+for ii = 1:numel(lat)   
+    idx = cellfun(@(X,Y) inpolygon(lon(ii),lat(ii),X,Y),S.X, S.Y);
+    if any(idx)
+        if ~strcmpi(country(ii),S.COUNTRY(idx))
+            ErrorSites = [ErrorSites;[country(ii),S.COUNTRY(idx),lat(ii),lon(ii)]];
+        end
+    end
+end
+if numel(ErrorSites) == 0
+    disp("Check 1b Passed: All coorinates consistent with country names")
+else
+    disp("Check 1b Failed: Inconsistent coordinates and country names (see ErrorSites)")
+    FailedTests = [FailedTests; "Check 1c"];
+end
+
 
 % 2) AGE INFORMATION
 %    (a) Confirm all entries a numeric age, Period, and Stage information
@@ -252,20 +299,17 @@ else
     FailedTests = [FailedTests; "Check 5c"];
 end
 
-clearvars -except PhanSST GTS FailedTests
+clearvars -except PhanSST GTS FailedTests ErrorSites
 fprintf("AUTOMATED QC CHECKS COMPLETE. \n %d/13 Passed.\n",13-numel(FailedTests))
 if numel(FailedTests) > 0
     disp("Failed tests:")
     disp(FailedTests)
 end
 
-
-
 %% MANUAL CHECKS
 % In addition to the automated checks, it may be useful to print lists of
 % certain variables and manually inspect them for inconsistencies or errors
 % These include:
-
 % 1) Site names
     sitenames = unique(PhanSST.SiteName);
 % 2) Site hole identifiers
@@ -276,3 +320,23 @@ end
     countries = unique(PhanSST.Country);
 % 5) Species names
     species = unique(PhanSST.Taxon3);
+    
+% You can also print maps of modern coordinates of the data, parsed by
+% ContinentOcean value to make sure that things graphically make sense
+ContinentOcean = ["af";"an";"ar";"as";"at";"au";"eu";"in";"me";"na";"pa";"sa";"so"];
+marker = ['o','^','s','<','d','v','p','>','o','^','s','<','d'];
+fig = figure(1); clf
+cm =customcolormap(linspace(0,1,6),{'#023047','#219EBC','#8ECAE6','#FFB703','#FB8500','#A72608'},numel(ContinentOcean));
+worldmap('World');setm(gca,'meridianlabel','off','parallellabel','off');
+geoshow(shaperead('landareas', 'UseGeoCoords', true),'EdgeColor','none','FaceColor',[.75 .75 .75]);
+for ii = 1:numel(ContinentOcean)
+    idx = find(PhanSST.ContinentOcean == ContinentOcean(ii));
+    coors = unique([PhanSST.ModLat(idx), PhanSST.ModLon(idx)],'rows');
+    s(ii) = scatterm(coors(:,1),coors(:,2),40,cm(ii,:),'filled');
+    s(ii).Children.MarkerFaceAlpha = .5;
+    s(ii).Children.MarkerEdgeColor = cm(ii,:);
+    s(ii).Children.Marker = marker(ii);
+    s(ii).DisplayName = ContinentOcean(ii);   
+end
+leg = legend(s,ContinentOcean);
+leg.Location = 'eastoutside';
