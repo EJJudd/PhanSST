@@ -4,12 +4,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Script created: 02/2022 (E. Judd)
-% Last updated: 02/2022 (E. Judd)
+% Last updated: 07/2022 (E. Judd)
 % Purpose: This is a script to replicate Figure 6 of Judd et al. (submitted
 % to Scientific Data)
 
 % Files needed:
-%   (1): PhanSST database (E. Judd,2022) available via figshare
+%   (1): PhanSST database (E. Judd et al., 2022) 
+%        available via paleo-temperature.org & figshare
 % Auxillary functions needed
 %   (1): hex2rgb - (C. Greene, 2022) available on MATLAB file exchange:
 %        https://www.mathworks.com/matlabcentral/fileexchange/46289-rgb2hex-and-hex2rgb
@@ -20,56 +21,58 @@
 %   (5): legendScatter - (M. Bagagli, 2022) available on MATLAB file exchange:
 %        https://www.mathworks.com/matlabcentral/fileexchange/59425-legend-scatter
 
-
-% PART (1) LOAD DATA
+%% PART (1) LOAD DATA
 % (a) Direct filepath 
 % (*MODIFY TO REFLECT END USER'S FILEPATHS AND PREFERRED FIGURE NAME)
 datafilename = 'PhanSST_v001.csv';
 figname = 'Fig6_ModernMaps.png';
 
-% (b) differentiate between character and numeric fields
-charfields = {'Sample','SiteName','SiteHole','Formation','Country',...
-        'ContinentOcean','Stage','StagePosition','Biozone','ProxyType','ValueType',...
-        'Taxon1','Taxon2','Taxon3','Environment','Ecology','CL','LeadAuthor','DOI'};
+% (b) Indicate which fields are strings vs. numeric values
+stringfields = {'SampleID','SiteName','SiteHole','Formation','Country',...
+        'ContinentOcean','Period','Stage','StagePosition','Biozone',...
+        'ProxyType','ValueType','Taxon1','Taxon2','Taxon3','Environment',...
+        'Ecology','CL','LeadAuthor','PublicationDOI','DataDOI'};
 doublefields = {'MBSF','MCD','SampleDepth','ModLat','ModLon','Age',...
-        'ProxyValue','DiagenesisFlag','ModWaterDepth','CleaningMethod',...
-        'Mn','Fe','Sr','Mg','Ca','Cawtp','MgCa','SrCa','NBS120c','MaximumCAI'...
-        'GDGT0','GDGT1','GDGT2','GDGT3','Cren','Crenisomer','BIT','dRI',...
-        'MI','Year'};
+        'AgeFlag','ProxyValue','DiagenesisFlag','Mn','Fe','Sr','Mg','Ca',...
+        'Cawtp','MgCa','SrCa','MnSr','NBS120c','Durango','MaximumCAI',...
+        'ModWaterDepth','CleaningMethod','GDGT0','GDGT1','GDGT2','GDGT3',...
+        'Cren','Crenisomer','BIT','dRI','MI','Year'};
 opts = detectImportOptions(datafilename);
-opts = setvartype(opts,charfields,'char');
+opts = setvartype(opts,stringfields,'string');
 opts = setvartype(opts,doublefields,'double');
+opts = setvaropts(opts,stringfields,'FillValue',"");
+
 % (c) Read in PhanSST Database
-data = readtable(datafilename,opts);
+PhanSST = readtable(datafilename,opts);
 
 %% PART (2) Create figure, specify proxy names and colors & suplot ax pos
-    fig=figure('Name','Fig6_ModernMaps','NumberTitle','off');
-    set(fig,'color','w');
-    fig.Units='inches';
-    fig.Position=[20.5,2,15,10];
-    PlotSpecs.Color = flipud(hex2rgb(['#9B2226';'#FFB703';'#B4BE65';'#0A9396';'#005F73'],1));
-    PlotSpecs.ProxyType = ["d18c";"d18p";"mg";"tex";"uk"];
+fig=figure('Name','Fig6_ModernMaps','NumberTitle','off');
+set(fig,'color','w');
+fig.Units='inches';
+fig.Position=[20.5,2,15,10];
+PlotSpecs.Color = flipud(hex2rgb(['#9B2226';'#FFB703';'#B4BE65';'#0A9396';'#005F73'],1));
+PlotSpecs.ProxyType = ["d18c";"d18p";"mg";"tex";"uk"];
 
-    PlotSpecs.EraLab = ["A                         Cenozoic";...
-        "B                         Mesozoic";...
-        "C                         Paleozoic"];
-    PlotSpecs.ProxyLab = ["D                          δ^{18}O\fontsize{10}carbonate";...
-           "E                          δ^{18}O\fontsize{10}phosphate";...
-           "F                          Mg/Ca";...
-           "G                          TEX\fontsize{10}86";...
-           "H                          U^{K'}_{37}"];
-    w=.32; h=.3; 
-    c1=.0125; c2=.3438; c3=.6751; 
-    r1=.66; r2=.33; r3=.01;
-    axPos = [c1,r1,w,h;c2,r1,w,h;c3,r1,w,h;...
-             c1,r2,w,h;c2,r2,w,h;c3,r2,w,h;...
-             c1,r3,w,h;c2,r3,w,h;c3,r3,w,h];
+PlotSpecs.EraLab = ["A                         Cenozoic";...
+    "B                         Mesozoic";...
+    "C                         Paleozoic"];
+PlotSpecs.ProxyLab = ["D                          δ^{18}O\fontsize{10}carbonate";...
+       "E                          δ^{18}O\fontsize{10}phosphate";...
+       "F                          Mg/Ca";...
+       "G                          TEX\fontsize{10}86";...
+       "H                          U^{K'}_{37}"];
+w=.32; h=.3; 
+c1=.0125; c2=.3438; c3=.6751; 
+r1=.66; r2=.33; r3=.01;
+axPos = [c1,r1,w,h;c2,r1,w,h;c3,r1,w,h;...
+         c1,r2,w,h;c2,r2,w,h;c3,r2,w,h;...
+         c1,r3,w,h;c2,r3,w,h;c3,r3,w,h];
          
 %% PART (3) Maps by Eras
 % (a) Parse entries by era (ce, me, pe) and sites (cs, ms, ps)
-ce = data(data.Age<66,:);
-me = data(data.Age>=66 & data.Age<251.9,:);
-pe = data(data.Age>=251.9,:);
+ce = PhanSST(PhanSST.Age<66,:);
+me = PhanSST(PhanSST.Age>=66 & PhanSST.Age<251.9,:);
+pe = PhanSST(PhanSST.Age>=251.9,:);
 cs = unique([ce.ModLat,ce.ModLon],'rows');
 ms = unique([me.ModLat,me.ModLon],'rows');
 ps = unique([pe.ModLat,pe.ModLon],'rows');
@@ -108,7 +111,7 @@ end
 
 % PART (4) Maps by proxies
 for ii = 1:numel(PlotSpecs.ProxyType)
-   d = data(strcmpi(string(data.ProxyType),PlotSpecs.ProxyType(ii)),:);
+   d = PhanSST(strcmpi(string(PhanSST.ProxyType),PlotSpecs.ProxyType(ii)),:);
    Nsites = unique([d.ModLat,d.ModLon],'rows');
    Nentries = NaN(numel(Nsites)/2,1);
    for jj = 1:numel(Nsites)/2
@@ -138,5 +141,3 @@ leg.Units = 'normalized';leg.Position=[.775,.0175,.125,.3];
 leg.FontName = 'Arial'; leg.FontSize = 12;
 
 export_fig(fig,figname,'-transparent','-p0.01','-m5')
-
- 
