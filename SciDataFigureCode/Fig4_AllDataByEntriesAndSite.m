@@ -4,13 +4,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Script created: 02/2022 (E. Judd)
-% Last updated: 02/2022 (E. Judd)
+% Last updated: 07/2022 (E. Judd)
 % Purpose: This is a script to replicate Figure 4 of Judd et al. (submitted
-% to Scientific Data)
+%          to Scientific Data)
 
 % Files needed:
-%   (1): PhanSST database (E. Judd,2022) available via figshare
-%   (2): StageNamesandAges (E. Judd, 2022) available via github
+%   (1): PhanSST database (E. Judd et al., 2022) 
+%        available via paleo-temperature.org & figshare
+%   (2): StageNamesandAges (E. Judd et al., 2022)
+%        available via paleo-temperature.org, figshare, & Github
 % Auxillary functions needed
 %   (1): hex2rgb - (C. Greene, 2022) available on MATLAB file exchange:
 %        https://www.mathworks.com/matlabcentral/fileexchange/46289-rgb2hex-and-hex2rgb
@@ -18,40 +20,44 @@
 %   (3): export_fig - (Y. Altman, 2022) available on github:
 %        https://github.com/altmany/export_fig/releases/tag/v3.21
 
-% PART (1) LOAD DATA
+%% PART (1) LOAD DATA
 % (a) Direct filepath 
 % (*MODIFY TO REFLECT END USER'S FILEPATHS AND PREFERRED FIGURE NAME)
 datafilename = 'PhanSST_v001.csv';
 stagefilename = 'StageNamesandAges.csv';
 figname = 'Fig4_AllDataByEntriesAndSite.png';
 
-% (b) differentiate between character and numeric fields
-charfields = {'Sample','SiteName','SiteHole','Formation','Country',...
-        'ContinentOcean','Stage','StagePosition','Biozone','ProxyType','ValueType',...
-        'Taxon1','Taxon2','Taxon3','Environment','Ecology','CL','LeadAuthor','DOI'};
+% (b) Indicate which fields are strings vs. numeric values
+stringfields = {'SampleID','SiteName','SiteHole','Formation','Country',...
+        'ContinentOcean','Period','Stage','StagePosition','Biozone',...
+        'ProxyType','ValueType','Taxon1','Taxon2','Taxon3','Environment',...
+        'Ecology','CL','LeadAuthor','PublicationDOI','DataDOI'};
 doublefields = {'MBSF','MCD','SampleDepth','ModLat','ModLon','Age',...
-        'ProxyValue','DiagenesisFlag','ModWaterDepth','CleaningMethod',...
-        'Mn','Fe','Sr','Mg','Ca','Cawtp','MgCa','SrCa','NBS120c','MaximumCAI'...
-        'GDGT0','GDGT1','GDGT2','GDGT3','Cren','Crenisomer','BIT','dRI',...
-        'MI','Year'};
+        'AgeFlag','ProxyValue','DiagenesisFlag','Mn','Fe','Sr','Mg','Ca',...
+        'Cawtp','MgCa','SrCa','MnSr','NBS120c','Durango','MaximumCAI',...
+        'ModWaterDepth','CleaningMethod','GDGT0','GDGT1','GDGT2','GDGT3',...
+        'Cren','Crenisomer','BIT','dRI','MI','Year'};
 opts = detectImportOptions(datafilename);
-opts = setvartype(opts,charfields,'char');
+opts = setvartype(opts,stringfields,'string');
 opts = setvartype(opts,doublefields,'double');
-% (c) Read in PhanSST Database
-data = readtable(datafilename,opts);    
-Stages = readtable(stagefilename);
+opts = setvaropts(opts,stringfields,'FillValue',"");
+
+% (c) Load PhanSST data & GTS2020 information (available in supplemental
+%     files)
+PhanSST = readtable(datafilename, opts);   
+GTS = readtable(stagefilename);
 
 %% PART (2) PRE-TREAT DATA
 %  (a) Assign bin range and means
-    binrng = [Stages.UpperBoundary;Stages.LowerBoundary(end)];
-    binmn = Stages.Average;
+    binrng = [GTS.UpperBoundary;GTS.LowerBoundary(end)];
+    binmn = GTS.Average;
 %  (b) Create list of unique proxy types
-    fn = unique(data.ProxyType);
+    fn = unique(PhanSST.ProxyType);
 
 %  (c) For each time bin and proxy type, find the number of entries and
 %      unique sampling sites
     for ii = 1:numel(fn)
-    d = data(strcmpi(data.ProxyType,fn(ii)),:);
+    d = PhanSST(strcmpi(PhanSST.ProxyType,fn(ii)),:);
     counts.entries.(fn{ii}) = zeros(length(binrng)-1,1);
     counts.sites.(fn{ii}) = zeros(length(binrng)-1,1);
     for jj = 1:numel(binrng)-1
@@ -65,7 +71,7 @@ Stages = readtable(stagefilename);
     end
     end
 
-%  (d) Combine arargonite and calcite isotope data into same proxy field
+%  (d) Combine arargonite and calcite isotope PhanSST into same proxy field
     counts.entries.d18c = counts.entries.d18a+counts.entries.d18c;
     counts.sites.d18c = counts.sites.d18a+counts.sites.d18c;
     counts.entries = rmfield(counts.entries,'d18a');
@@ -128,7 +134,7 @@ Stages = readtable(stagefilename);
     ax.YTick = centerY;
     ax.YTickLabels=PlotSpecs.Proxy;
     ax.FontSize=11;ax.FontName='Arial';
-    geologictimescale(0,Stages.LowerBoundary(end),'normal','reverse',ax,'standard','stages','off',15)    
+    geologictimescale(0,GTS.LowerBoundary(end),'normal','reverse',ax,'standard','stages','off',15)    
     xlabel('Age (Ma)','FontName','Arial','FontWeight','bold','FontSize',15)
  
     % add legend (placement quasi manual)
@@ -145,11 +151,11 @@ Stages = readtable(stagefilename);
 %  (c) PANEL 2: Proportion of entires
     ax = subplot('Position',[.55 .55 .4 .425]);
     fn = fieldnames(counts.entries);
-    y = zeros(numel(Stages.Stage),1);
-    x = Stages.UpperBoundary;
-    w = Stages.LowerBoundary - Stages.UpperBoundary;
+    y = zeros(numel(GTS.Stage),1);
+    x = GTS.UpperBoundary;
+    w = GTS.LowerBoundary - GTS.UpperBoundary;
     for jj = 1:numel(fn)
-    for ii = 1:numel(Stages.Average)
+    for ii = 1:numel(GTS.Average)
         if isnan(proportion.entries.(fn{jj})(ii))
             proportion.entries.(fn{jj})(ii) = 0;
         end
@@ -163,13 +169,13 @@ Stages = readtable(stagefilename);
     ax.YTickLabel = ax.YTick*100; 
     ax.FontName = 'Arial'; ax.FontSize = 11;
     ylabel({'Proportion of entries'; 'per proxy (%)'},'fontname','Arial','fontweight','bold','FontSize',15')
-    geologictimescale(0,Stages.LowerBoundary(end),'normal','reverse',ax,'standard','stages','off',7.75)    
+    geologictimescale(0,GTS.LowerBoundary(end),'normal','reverse',ax,'standard','stages','off',7.75)    
 
 %  (d) PANEL 3: Proportion of sites
     ax = subplot('Position',[.55 .075 .4 .425]);hold on
-    y = zeros(numel(Stages.Stage),1);
+    y = zeros(numel(GTS.Stage),1);
     for jj = 1:numel(fn)
-    for ii = 1:numel(Stages.Average)
+    for ii = 1:numel(GTS.Average)
         if isnan(proportion.sites.(fn{jj})(ii))
             proportion.sites.(fn{jj})(ii) = 0;
         end
@@ -184,7 +190,7 @@ Stages = readtable(stagefilename);
     ax.FontName = 'Arial'; ax.FontSize = 11;
     ylabel({'Proportion of sampling sites';'per proxy (%)'},'fontname','Arial','fontweight','bold','FontSize',15')
     xlabel('Age (Ma)','FontName','Arial','FontWeight','bold','FontSize',15)
-    geologictimescale(0,Stages.LowerBoundary(end),'normal','reverse',ax,'standard','stages','off',7.75)    
+    geologictimescale(0,GTS.LowerBoundary(end),'normal','reverse',ax,'standard','stages','off',7.75)    
     
 % (e) Add panel labels (quasi manual)
     annotation('textbox',[.01,.99,0,0],'string','A','fontsize',15,'fontname','Arial','fontweight','bold')
