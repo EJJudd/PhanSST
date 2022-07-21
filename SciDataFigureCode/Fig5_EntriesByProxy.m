@@ -4,13 +4,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Script created: 02/2022 (E. Judd)
-% Last updated: 02/2022 (E. Judd)
+% Last updated: 07/2022 (E. Judd)
 % Purpose: This is a script to replicate Figure 5 of Judd et al. (submitted
 % to Scientific Data)
 
 % Files needed:
-%   (1): PhanSST database (E. Judd,2022) available via figshare
-%   (2): StageNamesandAges (E. Judd, 2022) available via github
+%   (1): PhanSST database (E. Judd et al., 2022) 
+%        available via paleo-temperature.org & figshare
+%   (2): StageNamesandAges (E. Judd et al., 2022)
+%        available via paleo-temperature.org, figshare, & Github
 % Auxillary functions needed
 %   (1): hex2rgb - (C. Greene, 2022) available on MATLAB file exchange:
 %        https://www.mathworks.com/matlabcentral/fileexchange/46289-rgb2hex-and-hex2rgb
@@ -18,28 +20,31 @@
 %   (3): export_fig - (Y. Altman, 2022) available on github:
 %        https://github.com/altmany/export_fig/releases/tag/v3.21
 
-% PART (1) LOAD DATA
+%% PART (1) LOAD DATA
 % (a) Direct filepath 
 % (*MODIFY TO REFLECT END USER'S FILEPATHS AND PREFERRED FIGURE NAME)
 datafilename = 'PhanSST_v001.csv';
 stagefilename = 'StageNamesandAges.csv';
 figname = 'Fig5_EntriesByProxy.png';
 
-% (b) differentiate between character and numeric fields
-charfields = {'Sample','SiteName','SiteHole','Formation','Country',...
-        'ContinentOcean','Stage','StagePosition','Biozone','ProxyType','ValueType',...
-        'Taxon1','Taxon2','Taxon3','Environment','Ecology','CL','LeadAuthor','DOI'};
+% (b) Indicate which fields are strings vs. numeric values
+stringfields = {'SampleID','SiteName','SiteHole','Formation','Country',...
+        'ContinentOcean','Period','Stage','StagePosition','Biozone',...
+        'ProxyType','ValueType','Taxon1','Taxon2','Taxon3','Environment',...
+        'Ecology','CL','LeadAuthor','PublicationDOI','DataDOI'};
 doublefields = {'MBSF','MCD','SampleDepth','ModLat','ModLon','Age',...
-        'ProxyValue','DiagenesisFlag','ModWaterDepth','CleaningMethod',...
-        'Mn','Fe','Sr','Mg','Ca','Cawtp','MgCa','SrCa','NBS120c','MaximumCAI'...
-        'GDGT0','GDGT1','GDGT2','GDGT3','Cren','Crenisomer','BIT','dRI',...
-        'MI','Year'};
+        'AgeFlag','ProxyValue','DiagenesisFlag','Mn','Fe','Sr','Mg','Ca',...
+        'Cawtp','MgCa','SrCa','MnSr','NBS120c','Durango','MaximumCAI',...
+        'ModWaterDepth','CleaningMethod','GDGT0','GDGT1','GDGT2','GDGT3',...
+        'Cren','Crenisomer','BIT','dRI','MI','Year'};
 opts = detectImportOptions(datafilename);
-opts = setvartype(opts,charfields,'char');
+opts = setvartype(opts,stringfields,'string');
 opts = setvartype(opts,doublefields,'double');
+opts = setvaropts(opts,stringfields,'FillValue',"");
+
 % (c) Read in PhanSST Database
-data = readtable(datafilename,opts);    
-Stages = readtable(stagefilename);
+PhanSST = readtable(datafilename,opts);    
+GTS = readtable(stagefilename);
 
 
 %% PART(2) PLOT FIGURE
@@ -61,10 +66,10 @@ minage = NaN(numel(PlotSpecs.ProxyType),1);
 for pp = 1:numel(PlotSpecs.ProxyType)
     % subset data (combine aragonite data with other carbonate data)
     if strcmpi(PlotSpecs.ProxyType(pp), 'd18c')
-    d = data(strcmpi(string(data.ProxyType),PlotSpecs.ProxyType(pp)) | ...
-        strcmpi(string(data.ProxyType),'d18a'),:);
+    d = PhanSST(strcmpi(string(PhanSST.ProxyType),PlotSpecs.ProxyType(pp)) | ...
+        strcmpi(string(PhanSST.ProxyType),'d18a'),:);
     else 
-    d = data(strcmpi(string(data.ProxyType),PlotSpecs.ProxyType(pp)),:);
+    d = PhanSST(strcmpi(string(PhanSST.ProxyType),PlotSpecs.ProxyType(pp)),:);
     end
     % remove diagenetic data (du = data unaltered)
     du = d;
@@ -74,20 +79,20 @@ for pp = 1:numel(PlotSpecs.ProxyType)
     end
     maxstage = unique(string(d.Stage(d.Age == max(d.Age))));
     minstage = unique(string(d.Stage(d.Age == min(d.Age))));
-    maxage(pp,1) = Stages.LowerBoundary(strcmpi(Stages.Stage,maxstage));
-    minage(pp,1) = Stages.UpperBoundary(strcmpi(Stages.Stage,minstage));
+    maxage(pp,1) = GTS.LowerBoundary(strcmpi(GTS.Stage,maxstage));
+    minage(pp,1) = GTS.UpperBoundary(strcmpi(GTS.Stage,minstage));
 
-    Nentry = NaN(find(strcmpi(string(Stages.Stage), maxstage)),1);
-    Nentry_unaltered = NaN(find(strcmpi(string(Stages.Stage), maxstage)),1);
+    Nentry = NaN(find(strcmpi(string(GTS.Stage), maxstage)),1);
+    Nentry_unaltered = NaN(find(strcmpi(string(GTS.Stage), maxstage)),1);
     ax = axes('Position',axPos(pp,:));
-    for ii = 1:find(strcmpi(string(Stages.Stage), maxstage))
-        Nentry_unaltered(ii) = numel(find(strcmpi(string(du.Stage), string(Stages.Stage(ii)))));
-        Nentry(ii,1) = numel(find(strcmpi(string(d.Stage), string(Stages.Stage(ii)))));
-        r1 = rectangle('Position',[Stages.UpperBoundary(ii),0,Stages.LowerBoundary(ii)-...
-            Stages.UpperBoundary(ii),Nentry(ii)],'FaceColor',...
+    for ii = 1:find(strcmpi(string(GTS.Stage), maxstage))
+        Nentry_unaltered(ii) = numel(find(strcmpi(string(du.Stage), string(GTS.Stage(ii)))));
+        Nentry(ii,1) = numel(find(strcmpi(string(d.Stage), string(GTS.Stage(ii)))));
+        r1 = rectangle('Position',[GTS.UpperBoundary(ii),0,GTS.LowerBoundary(ii)-...
+            GTS.UpperBoundary(ii),Nentry(ii)],'FaceColor',...
             [PlotSpecs.Color(end-pp+1,:),.25],'EdgeColor','k');
-        r2 = rectangle('Position',[Stages.UpperBoundary(ii),0,Stages.LowerBoundary(ii)-...
-            Stages.UpperBoundary(ii),Nentry_unaltered(ii)],'FaceColor',...
+        r2 = rectangle('Position',[GTS.UpperBoundary(ii),0,GTS.LowerBoundary(ii)-...
+            GTS.UpperBoundary(ii),Nentry_unaltered(ii)],'FaceColor',...
             PlotSpecs.Color(end-pp+1,:),'EdgeColor','k');
     end
     % tidy plot & add panel labels
@@ -117,10 +122,3 @@ for pp = 1:numel(PlotSpecs.ProxyType)
 end
 
 export_fig(fig,figname,'-transparent','-p0.01','-m5')
-
-
-
-
-
-
-
