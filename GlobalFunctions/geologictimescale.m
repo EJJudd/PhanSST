@@ -2,49 +2,49 @@ function geologictimescale(xmin,xmax,Yaxisopt,Xaxisopt,axisselect,...
                             colorselect,divisions,labels,sf)
                         
                         
-    %SCRIPT TO ADD GEOLOGIC TIME SCALE TO FIGURES
-    %Created: 08/2020 (E. Judd)
-    %Last updated: 03/2022 (E. Judd)
-    
-    %INPUTS:
-    %xmin: minimum age of plot (in myrs)
-        %default: 0 Ma
-    %xmax: maximum age of plot (in myrs)
-        %default: 538.8 Ma
-    %Yaxisopts: do you want the y-axis normal or reverse (L-R)?
-        %'normal' (default)
-        %'reverse'
-    %Xaxisopts: do you want the x-axis normal or reverse?
-        %'normal' (defualt; time proceeds right to left)
-        %'reverse' (time proceeds left to right)
-    %axisselect: which axis do you want to plot the time scale on?
-    %            (default: gca)
-    %colorselect: do you want to use the standard timescale colors or "fun"
-    %             colors? 
-        %'standard' (default)
-        %'fun' (currently in beta mode; fun only works in Cenozoic)
-    %divisions: the finest resolution age division you'd like to show
-        %'periods' (default, plots Eras and Periods)
-        %'epochs' (plots Periods and Epochs)
-        %'stages' (plots Periods and Stages)
-    %labels: should the finest resultion age division include labels?
-        %'on' (default)
-        %'off' (useful if you're plotting stages)
-    %sf: scale factor: scalar used to adjust the width of the time scale
-        %       (defaul: 7.5)
-        
-    %SYNTAX:
-    %geologictimescale            <--- uses all defaults
-    %geologictimescale(xmin,xmax) <--- fixes xlim otherwise uses defaults
-    %geologictimescale(...)       <--- user specifies all inputs
+%SCRIPT TO ADD GEOLOGIC TIME SCALE TO FIGURES
+%Created: 08/2020 (E. Judd)
+%Last updated: 09/2022 (E. Judd)
+
+%INPUTS:
+%xmin: minimum age of plot (in myrs)
+    %default: 0 Ma
+%xmax: maximum age of plot (in myrs)
+    %default: 538.8 Ma
+%Yaxisopts: do you want the y-axis normal or reverse (L-R)?
+    %'normal' (default)
+    %'reverse'
+%Xaxisopts: do you want the x-axis normal or reverse?
+    %'normal' (defualt; time proceeds right to left)
+    %'reverse' (time proceeds left to right)
+%axisselect: which axis do you want to plot the time scale on?
+%            (default: gca)
+%colorselect: do you want to use the standard timescale colors or "fun"
+%             colors? 
+    %'standard' (default)
+    %'fun' (currently in beta mode; fun only works in Cenozoic)
+%divisions: the finest resolution age division you'd like to show
+    %'periods' (default, plots Eras and Periods)
+    %'epochs' (plots Periods and Epochs)
+    %'stages' (plots Periods and Stages)
+%labels: should the finest resultion age division include labels?
+    %'on' (default)
+    %'off' (useful if you're plotting stages)
+%sf: scale factor: scalar used to adjust the width of the time scale
+    %       (defaul: 7.5)
+
+%SYNTAX:
+%geologictimescale            <--- uses all defaults
+%geologictimescale(xmin,xmax) <--- fixes xlim otherwise uses defaults
+%geologictimescale(...)       <--- user specifies all inputs
     
     
 % (1) Load GTS file (CHANGE BASED ON FILENAME/LOCATION)
-    Stages = readtable('StageNamesandAges.csv');
+    load("GTS2020.mat")
 % (2) If nargin == 0 or 2, specify defaults
     if nargin == 0
-        xmin = Stages.UpperBoundary(1);
-        xmax = Stages.LowerBoundary(end);
+        xmin = GTS.UpperBoundary(1);
+        xmax = GTS.LowerBoundary(end);
         Yaxisopt = 'normal';
         Xaxisopt = 'normal';
         axisselect = gca;
@@ -67,30 +67,30 @@ function geologictimescale(xmin,xmax,Yaxisopt,Xaxisopt,axisselect,...
     Time.Eras = [0.0;66.04;251.9;538.8];
     Name.Eras = ["Cenozoic";"Mesozoic";"Paleozoic"];
     % (b) Periods:
-    Color.Periods = [Stages.Rperiod,Stages.Gperiod,Stages.Bperiod];
+    Color.Periods = [GTS.Rperiod,GTS.Gperiod,GTS.Bperiod];
     [~, idx] = unique(Color.Periods,'rows');idx = sort(idx);
     Color.Periods = Color.Periods(idx,:);
     if strcmpi(colorselect,'fun') == 1
     Color.Periods = [hex2rgb('#868e71',1);hex2rgb('#899099',1);hex2rgb('#8c7a84',1);127,198,78;52,178,201;129,43,146;...
         240,64,40;123,165,153;203,140,55;179,225,182;0,146,112;127,160,86];
     end    
-    Time.Periods = [Stages.UpperBoundary(idx);Stages.LowerBoundary(end)];
-    Name.Periods = Stages.Period(idx);Name.Periods(1) = {'Q'};
+    Time.Periods = [GTS.UpperBoundary(idx);GTS.LowerBoundary(end)];
+    Name.Periods = GTS.Period(idx);Name.Periods(1) = {'Q'};
     Abbrev.Periods = ["Q";"N";"Pg";"K";"J";"T";"P";"C";"D";"S";"O";"Cm"];
     % (c) Epochs:
-    Color.Epochs = [Stages.Repoch,Stages.Gepoch,Stages.Bepoch];
+    Color.Epochs = [GTS.Repoch,GTS.Gepoch,GTS.Bepoch];
     [~, idx] = unique(Color.Epochs,'rows');idx = sort(idx);
     Color.Epochs = Color.Epochs(idx,:);
     if strcmpi(colorselect,'fun')
         Color.Epochs = hex2rgb({'#9ba58c','#717856', '#acb5bb','#656b77', '#dac3b8','#a58e91','#736678'},1);
     end
-    Time.Epochs = [Stages.UpperBoundary(idx);Stages.LowerBoundary(end)];
-    Name.Epochs = Stages.Epoch(idx);Name.Epochs(1) = {'H'};
+    Time.Epochs = [GTS.UpperBoundary(idx);GTS.LowerBoundary(end)];
+    Name.Epochs = GTS.Epoch(idx);Name.Epochs(1) = {'H'};
         Name.Epochs(2) = {'Pleist'};Name.Epochs(3) = {'Plio'};
     % (d) Stages:
-    Color.Stages = [Stages.Rstage,Stages.Gstage,Stages.Bstage];
-    Time.Stages = [Stages.UpperBoundary;Stages.LowerBoundary(end)];
-    Name.Stages = Stages.Stage;
+    Color.Stages = [GTS.Rstage,GTS.Gstage,GTS.Bstage];
+    Time.Stages = [GTS.UpperBoundary;GTS.LowerBoundary(end)];
+    Name.Stages = GTS.Stage;
 
 %(4) Adjust range of starting parameters to data
     %(a) Eras
