@@ -145,9 +145,9 @@ for ii = 1:numel(lat)
     end
 end
 if numel(ErrorSites) == 0
-    disp("Check 1b Passed: All coorinates consistent with country names")
+    disp("Check 1c Passed: All coorinates consistent with country names")
 else
-    disp("Check 1b Failed: Inconsistent coordinates and country names (see ErrorSites)")
+    disp("Check 1c Failed: Inconsistent coordinates and country names (see ErrorSites)")
     FailedTests = [FailedTests; "Check 1c"];
 end
 
@@ -291,15 +291,14 @@ else
     disp("Check 5b Failed: Entries with missing publication year")
     FailedTests = [FailedTests; "Check 5b"];
 end
-%   (c) Check for missing PublicationDOI values
-if all(~cellfun(@isempty,PhanSST.PublicationDOI))
-    disp("Check 5c Passed: All entries associated with a publication DOI")
+%   (c) Check for missing DOI values
+if all(~cellfun(@isempty,PhanSST.PublicationDOI) | ~cellfun(@isempty,PhanSST.DataDOI))
+    disp("Check 5c Passed: All entries associated with a publication and/or data DOI")
 else
-    disp("Check 5c Failed: Entries with missing publication DOIs")
+    disp("Check 5c Failed: Entries with missing DOIs")
     FailedTests = [FailedTests; "Check 5c"];
 end
 
-clearvars -except PhanSST GTS FailedTests ErrorSites
 fprintf("AUTOMATED QC CHECKS COMPLETE. \n %d/13 Passed.\n",13-numel(FailedTests))
 if numel(FailedTests) > 0
     disp("Failed tests:")
