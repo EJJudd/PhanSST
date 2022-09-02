@@ -7,16 +7,21 @@ Created: February 2022 (E. Judd)
 <br /> Current release: PhanSST v 0.0.1
 
 This repository contains the PhanSST Database of paleo-sea surface temperature (SST) proxy data spanning the Phanerozoic Eon and are associated with the 
-manuscript: *The PhanSST global database of Phanerozoic sea surface temperature proxy data* (Judd et al., submitted, Scientific Data).
+manuscript: 
+
+*The PhanSST global database of Phanerozoic sea surface temperature proxy data* (Judd et al., submitted, Scientific Data).
+
+Please refer to this manuscript for additional information and cite it when using data from the PhanSST database.
+
 
 The **PhanSSTDatabase** folder contains the database csv file and other auxilary files, discussed in detail below.
 <br /> The **SciDataSupplemental** folder contains additional supplemental information and resources referenced within Judd et al. 
 (submitted), including scripts to run the automated QC procedures and example scripts and functions to generate the figures in the paper.
 
 To view the quality control spreadsheets, please visit paleo-temperature.org or use the following links:
-<br /> 	•	Drill core data: https://docs.google.com/spreadsheets/d/e/2PACX-1vTs8zmQyOINP7TqLaI2emuplMQaYMcM24z6tbsV1pnNZ5N5zXVkj-3SweGxlZyu6WCDhLQGPdzAg6zX/pubhtml
-<br /> 	•	Outcrop data: https://docs.google.com/spreadsheets/d/e/2PACX-1vRi32Mp-KtyCzt43nQ_ljpGM85fN-A7mnnFJ1o5Q-bF8dKTEZpDvDA5J5W_McoTK7RohSpPV4mMxZnI/pubhtml
-<br /> 	•	Foraminiferal taxonomy: https://docs.google.com/spreadsheets/d/e/2PACX-1vRWpolW-OSNhZMd3_8-sQ26yipR1FR2KsxYSHlIIavZfF2wCmrRKM3aVwRArtE9J1gy0j2tJlmoUIPM/pubhtml
+* **Drill core data**: https://docs.google.com/spreadsheets/d/e/2PACX-1vTs8zmQyOINP7TqLaI2emuplMQaYMcM24z6tbsV1pnNZ5N5zXVkj-3SweGxlZyu6WCDhLQGPdzAg6zX/pubhtml
+* **Outcrop data**: https://docs.google.com/spreadsheets/d/e/2PACX-1vRi32Mp-KtyCzt43nQ_ljpGM85fN-A7mnnFJ1o5Q-bF8dKTEZpDvDA5J5W_McoTK7RohSpPV4mMxZnI/pubhtml
+* **Foraminiferal taxonomy**: https://docs.google.com/spreadsheets/d/e/2PACX-1vRWpolW-OSNhZMd3_8-sQ26yipR1FR2KsxYSHlIIavZfF2wCmrRKM3aVwRArtE9J1gy0j2tJlmoUIPM/pubhtml
 
 ## PhanSSTDatabase
 This folder contains three files, detailed below:
