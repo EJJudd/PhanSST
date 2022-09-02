@@ -6,7 +6,7 @@ Created: February 2022 (E. Judd)
 <br /> Contact: ejjudd@syr.edu or phansst@outlook.com
 <br /> Current release: PhanSST v 0.0.1
 
-This repository contains the PhanSST Database of paleo-sea surface temperature (SST) proxy data spanning the Phanerozoic Eon and are associated with the 
+This repository contains the PhanSST Database of paleo-sea surface temperature (SST) proxy data spanning the Phanerozoic Eon and is associated with the 
 manuscript: 
 
 *The PhanSST global database of Phanerozoic sea surface temperature proxy data* (Judd et al., submitted, Scientific Data).
@@ -14,23 +14,12 @@ manuscript:
 Please refer to this manuscript for additional information and cite it when using data from the PhanSST database.
 
 
-The **PhanSSTDatabase** folder contains the database csv file and other auxilary files, discussed in detail below.
-<br /> The **SciDataSupplemental** folder contains additional supplemental information and resources referenced within Judd et al. 
-(submitted), including scripts to run the automated QC procedures and example scripts and functions to generate the figures in the paper.
-
 To view the quality control spreadsheets, please visit paleo-temperature.org or use the following links:
 * **Drill core data**: https://docs.google.com/spreadsheets/d/e/2PACX-1vTs8zmQyOINP7TqLaI2emuplMQaYMcM24z6tbsV1pnNZ5N5zXVkj-3SweGxlZyu6WCDhLQGPdzAg6zX/pubhtml
 * **Outcrop data**: https://docs.google.com/spreadsheets/d/e/2PACX-1vRi32Mp-KtyCzt43nQ_ljpGM85fN-A7mnnFJ1o5Q-bF8dKTEZpDvDA5J5W_McoTK7RohSpPV4mMxZnI/pubhtml
 * **Foraminiferal taxonomy**: https://docs.google.com/spreadsheets/d/e/2PACX-1vRWpolW-OSNhZMd3_8-sQ26yipR1FR2KsxYSHlIIavZfF2wCmrRKM3aVwRArtE9J1gy0j2tJlmoUIPM/pubhtml
 
-## PhanSSTDatabase
-This folder contains three files, detailed below:
-1. PhanSST_v001.csv
-2. PhanSST_v001_RefList.xlsx
-3. PhanSST_BlankEntryTemplate.csv
-
-
-### 1. PhanSST_v001.csv
+## PhanSST_v001.csv
 This file presents a database of paleo sea surface temperature (SST) proxy data and their associated metadata. For a full description of the database, the user is referred to the original publication in Scientific Data (see above). 
 Briefly, the field descriptions and units are as follows:
 * **SampleID**: The unique identifier of each sample
@@ -116,11 +105,11 @@ Briefly, the field descriptions and units are as follows:
 * **DataDOI**: The DOI or other identifying hyperlink to the online repository hosting the data
 
 
-### 2. PhanSST_v001_RefList.xlsx
+## PhanSST_v001_RefList.xlsx
 This file contains an excel spreadsheet with the full reference metadata for each paper cited in PhanSST.
 
 
-### 3. PhanSST_BlankEntryTemplate.csv
+## PhanSST_BlankEntryTemplate.csv
 This file provides a blank template with which to enter new paleo-SST data. 
 Completed data entry templates can be submitted via the PhanSST website (paleo-temperature.org) or by email (PhanSST@outlook.com).
 For detailed information regarding contributing data via the data entry template, please visit paleo-temperature.org.
