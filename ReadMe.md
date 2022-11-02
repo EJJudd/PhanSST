@@ -9,7 +9,7 @@ Created: February 2022 (E. Judd)
 This repository contains the PhanSST Database of paleo-sea surface temperature (SST) proxy data spanning the Phanerozoic Eon and is associated with the 
 manuscript: 
 
-*The PhanSST global database of Phanerozoic sea surface temperature proxy data* (Judd et al., submitted, Scientific Data).
+*The PhanSST global database of Phanerozoic sea surface temperature proxy data* (Judd et al., accepted, Scientific Data).
 
 Please refer to this manuscript for additional information and cite it when using data from the PhanSST database.
 
@@ -18,6 +18,8 @@ To view the quality control spreadsheets, please visit paleo-temperature.org or 
 * **Drill core data**: https://docs.google.com/spreadsheets/d/e/2PACX-1vTs8zmQyOINP7TqLaI2emuplMQaYMcM24z6tbsV1pnNZ5N5zXVkj-3SweGxlZyu6WCDhLQGPdzAg6zX/pubhtml
 * **Outcrop data**: https://docs.google.com/spreadsheets/d/e/2PACX-1vRi32Mp-KtyCzt43nQ_ljpGM85fN-A7mnnFJ1o5Q-bF8dKTEZpDvDA5J5W_McoTK7RohSpPV4mMxZnI/pubhtml
 * **Foraminiferal taxonomy**: https://docs.google.com/spreadsheets/d/e/2PACX-1vRWpolW-OSNhZMd3_8-sQ26yipR1FR2KsxYSHlIIavZfF2wCmrRKM3aVwRArtE9J1gy0j2tJlmoUIPM/pubhtml
+
+At the bottom of this document, please find a detailed list of any updates made to this database.
 
 ## PhanSST_v001.csv
 This file presents a database of paleo sea surface temperature (SST) proxy data and their associated metadata. For a full description of the database, the user is referred to the original publication in Scientific Data (see above). 
@@ -51,7 +53,7 @@ Briefly, the field descriptions and units are as follows:
 * **Stage**: The geologic stage
 * **StagePosition**: Further specification of relative age (early, middle, or late)
 * **Biozone**: The conodont, graptolite, and/or ammonite biozone
-* **AgeFlag**: Binary flag indicating if the Age field reflects a precise numeric assignment (0) or an estimate based on relative age information (1)
+* **AgeFlag**: Flag indicating if the Age field reflects a precise numeric assignment (0), an estimate based on relative age information (1), or if both the manually input numeric and relative ages have been retained (2)
 * **ProxyValue**: The reported proxy value (native proxy units)
 * **ProxyType**: Reference to the proxy type
   * *d18c*: oxygen isotopes of calcite (per mille, VPDB)
@@ -113,4 +115,14 @@ This file contains an excel spreadsheet with the full reference metadata for eac
 This file provides a blank template with which to enter new paleo-SST data. 
 Completed data entry templates can be submitted via the PhanSST website (paleo-temperature.org) or by email (PhanSST@outlook.com).
 For detailed information regarding contributing data via the data entry template, please visit paleo-temperature.org.
+
+
+## Updates:
+* **3 November 2022**: 
+  * Fixed error where SampleDepth values weren't compiling correctly with certain proxy systems
+  * Removed 2 references that presented seasonal rather than bulk data (Klein et al., 1997; Grossman et al., 2019)
+  * Added data from two new references (Babila, 2014; Brand and Bruckschen, 2002)
+  * Added option "2" for AgeFlag, to allow for certain data to have manually input numeric *and* relative age information (this is useful for data near boundaries, such as the K/Pg or PETM, whose age models might reflect older boundary date assignments)
+
+
 
